@@ -41,7 +41,7 @@ def login_view(request):
                     print ("Password does not match")
             else:
                 print ("user does not exist")
-            return render(request, 'success.html')
+            return render(request, 'index.html')
     elif request.method == 'GET':
         login_form = LoginForm()
         return render(request, 'login.html', {'form': login_form})
@@ -50,25 +50,32 @@ def login_view(request):
 def post_view(request):
     user = check_validation(request)
     if user:
-        if request.method == "GET":
-            post_form = PostForm()
-            return render(request, 'post.html', {'form': post_form})
-        elif request.method == "POST":
+        if request.method == "POST":
             post_form = PostForm(request.POST, request.FILES)
             if post_form.is_valid():
                 image = post_form.cleaned_data['image']
                 caption = post_form.cleaned_data['caption']
                 post = PostModel(user=user, image=image, caption=caption)
-                path = str(BASE_DIR + '/' + post.image.url)
+                post.save()
+                path = (BASE_DIR + "\\" + post.image.url)
                 client = ImgurClient('f7be8da6b2d2474', '2ec7b8a30028635db5e815fbcc8dab81c45d231a')
                 post.image_url = client.upload_from_path(path, anon=True)['link']
                 post.save()
+                return redirect('/feed/')
+        elif request.method == "GET":
+            post_form = PostForm()
+        return render(request, 'post.html', {'form': post_form})
     else:
-        return redirect('login/')
+        return redirect('/login/')
 
 
 def feed_view(request):
-    return render(request, 'feed.html')
+    user = check_validation(request)
+    if user:
+        posts = PostModel.objects.all().order_by("-created_on")
+        return render(request, 'feed.html', {'posts': posts})
+    else:
+        return redirect("/login/")
 
 
 def check_validation(request):

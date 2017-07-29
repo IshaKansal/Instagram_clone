@@ -24,5 +24,4 @@ urlpatterns = [
     url('feed/', feed_view),
     url('login/', login_view),
     url('', signup_view)
-
 ]

@@ -1,10 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+    </head>
+    <body>
+        <form  method="post" action="post/">
+            {% csrf_token %}
+            <input type="submit" class="button button-default " value="Create Post">
+        </form>
+        {% for post in posts %}
+            <h3>
+                Posted By:{{ post.user.username }}
+            </h3>
+            <img src="{{ post.image_url }}">
+            <br>
+            <br>
+            <span>
+                {{ post.caption }}
+            </span>
+        {% endfor %}
+    </body>
 </html>
