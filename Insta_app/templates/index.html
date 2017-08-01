@@ -19,7 +19,7 @@
 
             <form method="post">
                 {% csrf_token %}
-
+                {{ response }}
                 <div>
                     <label for="username">Username:</label>
                     <input id="username" type="text" name="username" value={{ username }}>

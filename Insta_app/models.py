@@ -6,10 +6,10 @@ class UserProfile(BaseModel):
     """
     This class contains the field for user data
     """
-    email = models.EmailField(max_length=255, unique=True, null=False, blank=False)
-    name = models.CharField(max_length=255, unique=True, null=False, blank=False)
+    email = models.EmailField(max_length=255)
+    name = models.CharField(max_length=255, null=False)
     username = models.CharField(max_length=255, unique=True, null=False, blank=False)
-    password = models.CharField(max_length=255, unique=True, null=False, blank=False)
+    password = models.CharField(max_length=255)
 
 
 class UserSession(BaseModel):
@@ -37,6 +37,10 @@ class PostModel(BaseModel):
     def comments(self):
         return CommentModel.objects.filter(post=self).order_by("-created_on")
 
+    @property
+    def categories(self):
+        return CategoriesModel.objects.filter(post=self)
+
 
 class LikeModel(BaseModel):
     user = models.ForeignKey(UserProfile)
@@ -48,3 +52,7 @@ class CommentModel(BaseModel):
     post = models.ForeignKey(PostModel)
     comment_text = models.CharField(max_length=1000)
 
+
+class CategoriesModel(models.Model):
+    post = models.ForeignKey(PostModel)
+    category_text = models.CharField(max_length=1000)
