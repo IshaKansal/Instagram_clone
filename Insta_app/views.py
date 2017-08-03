@@ -13,7 +13,8 @@ from sendgrid.helpers.mail import *
 import ctypes
 
 api_key = "b4bca6c0c5b94a9ca1ec75dd5e567d27"
-sendgrid_api_key = "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"
+sendgrid_api_key = "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"
+
 
 def check_validation(request):
     if request.COOKIES.get('session_token'):
@@ -47,7 +48,7 @@ def signup_view(request):
                 content = Content("text/plain", "Continue to login and create posts....have fun")
                 mail = Mail(from_email, subject, to_email, content)
                 response = sg.client.mail.send.post(request_body=mail.get())
-                if response.status_code:
+                if response.status_code == 202:
                     message = "Mail has been sent to your email-id"
                 else:
                     message = "There is some problem in sending a mail"
@@ -101,6 +102,7 @@ def post_view(request):
                 client = ImgurClient('f7be8da6b2d2474', '2ec7b8a30028635db5e815fbcc8dab81c45d231a')
                 post.image_url = client.upload_from_path(path, anon=True)['link']
                 post.save()
+                ctypes.windll.user32.MessageBoxW(0, u"Post has been successfully uploaded", u"Success", 0)
                 add_categories(post)
                 return redirect('/feed/')
         elif request.method == "GET":
@@ -118,7 +120,17 @@ def like_view(request):
             post_id = like_form.cleaned_data.get('post').id
             existing_like = LikeModel.objects.filter(post_id=post_id, user=user).first()
             if not existing_like:
-                LikeModel.objects.create(post_id=post_id, user=user)
+                like = LikeModel.objects.create(post_id=post_id, user=user)
+                sg = sendgrid.SendGridAPIClient(apikey=sendgrid_api_key)
+                from_email = Email("isha97kansal@gmail.com")
+                to_email = Email(like.post.user.email)
+                subject = "Post Liked!!"
+                message = "%s liked your post" % like.user.username
+                content = Content("text/plain", message)
+                mail = Mail(from_email, subject, to_email, content)
+                response = sg.client.mail.send.post(request_body=mail.get())
+                ctypes.windll.user32.MessageBoxW(0, u"Post has been successfully liked", u"Success", 0)
+
             else:
                 existing_like.delete()
             return redirect('/feed/')
@@ -135,7 +147,17 @@ def comment_view(request):
             comment_text = comment_form.cleaned_data.get('comment_text')
             comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
             comment.save()
+            sg = sendgrid.SendGridAPIClient(apikey=sendgrid_api_key)
+            from_email = Email("isha97kansal@gmail.com")
+            to_email = Email(comment.post.user.email)
+            subject = "Comment!!"
+            message = "%s commented on your post.Comment:%s" % (comment.user.username, comment_text)
+            content = Content("text/plain", message)
+            mail = Mail(from_email, subject, to_email, content)
+            response = sg.client.mail.send.post(request_body=mail.get())
+            ctypes.windll.user32.MessageBoxW(0, u"Successfully Commented", u"Success", 0)
             return redirect('/feed/')
+
         else:
             return redirect('/feed/')
     else:
