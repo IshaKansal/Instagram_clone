@@ -9,6 +9,11 @@
             {% csrf_token %}
             <input type="submit" class="button button-default " value="Create Post">
         </form>
+        <br>
+        <form method="POST" action="/logout/" >
+                {% csrf_token %}
+            <input type="submit" class="button button-default" value="Logout" >
+        </form>
         {% for post in posts %}
             <h3>
                 Posted By:{{ post.user.username }}

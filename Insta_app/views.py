@@ -49,7 +49,7 @@ def signup_view(request):
                 mail = Mail(from_email, subject, to_email, content)
                 response = sg.client.mail.send.post(request_body=mail.get())
                 if response.status_code == 202:
-                    message = "Mail has been sent to your email-id"
+                    message = "Account has been created successfully.Mail has been sent to your email-id"
                 else:
                     message = "There is some problem in sending a mail"
                 return render(request, 'success.html', {'response': message})
@@ -57,8 +57,8 @@ def signup_view(request):
                 ctypes.windll.user32.MessageBoxW(0, u"invalid username/password. please try again", u"Error", 0)
                 signup_form = SignUpForm()
         else:
-            ctypes.windll.user32.MessageBoxW(0, u"invalid entries. please try again", u"Error", 0)
-            signup_form = SignUpForm()
+                ctypes.windll.user32.MessageBoxW(0, u"invalid entries. please try again", u"Error", 0)
+                signup_form = SignUpForm()
     elif request.method == 'GET':
         signup_form = SignUpForm()
     return render(request, 'index.html', {"Today_date": date, 'form': signup_form})
@@ -130,7 +130,6 @@ def like_view(request):
                 mail = Mail(from_email, subject, to_email, content)
                 response = sg.client.mail.send.post(request_body=mail.get())
                 ctypes.windll.user32.MessageBoxW(0, u"Post has been successfully liked", u"Success", 0)
-
             else:
                 existing_like.delete()
             return redirect('/feed/')
@@ -197,3 +196,13 @@ def add_categories(post):
             print ("No output list error")
     else:
         print ("Response code error")
+
+
+def logout_view(request):
+    user = check_validation(request)
+    if user is not None:
+        latest_session = UserSession.objects.filter(user=user).last()
+        if latest_session:
+            latest_session.delete()
+
+    return redirect("/login/")
